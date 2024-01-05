@@ -37,6 +37,7 @@ struct TestRpcObject : public yamlrpc::RpcObject {
   TestRpcObject(yamlrpc::RpcTransport &Transport) : yamlrpc::RpcObject(Transport) {}
 
   yamlrpc::Command<void> simpleCall{this};
+  yamlrpc::Command<uint32_t, uint32_t, uint32_t> scalarArgs{this};
   yamlrpc::Command<Custom, Custom> customType{this};
 };
 
@@ -46,6 +47,8 @@ struct TestRpc {
   void simpleCall2();
 
   auto customType(Custom Arg) -> Custom;
+  
+  auto scalarArgs(uint32_t Arg1, uint32_t Arg2) -> uint32_t;
 
   bool SimpleCall1 = false;
   bool SimpleCall2 = false;

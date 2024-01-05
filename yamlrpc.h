@@ -53,17 +53,14 @@ template <> struct Serializer<void> {
 
 namespace detail {
 
-template <typename TArg>
-auto unpackArg(YAML::iterator &YIt, [[maybe_unused]] std::tuple<TArg> *PH) {
-  return std::make_tuple(Serializer<TArg>::deserialize(*YIt));
-}
-
 template <typename TArg1, typename... TArgs>
-auto unpackArg(YAML::iterator &YIt,
-               [[maybe_unused]] std::tuple<TArg1, TArgs...> *PH) {
-  return std::tuple_cat(
-      std::make_tuple(Serializer<TArg1>::deserialize(*YIt)),
-      unpackArg<TArgs...>(++YIt, nullptr));
+auto unpackArg(YAML::iterator &YIt) {
+  if constexpr (sizeof...(TArgs) > 0) {
+    return std::tuple_cat(std::make_tuple(Serializer<TArg1>::deserialize(*YIt)),
+                          unpackArg<TArgs...>(++YIt));
+  } else {
+    return std::make_tuple(Serializer<TArg1>::deserialize(*YIt));
+  }
 }
 
 inline void packArg(YAML::Node &Node) {}
@@ -257,7 +254,7 @@ private:
         return Serializer<TReturn>::serialize(Callback());
       }
     } else {
-      auto Tuple = detail::unpackArg<TArgs...>(YIt, nullptr);
+      auto Tuple = detail::unpackArg<TArgs...>(YIt);
 
       if constexpr (std::is_void_v<TReturn>) {
         std::apply(Callback, std::move(Tuple));
