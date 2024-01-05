@@ -34,6 +34,7 @@ SOFTWARE.
 
 namespace yamlrpc {
 
+// -----------------------------------------------------------------------------
 template <typename T> struct Serializer {
   using TStorage = std::decay_t<T>;
 
@@ -42,16 +43,18 @@ template <typename T> struct Serializer {
   static auto serialize(T const &Value) { return YAML::Node{Value}; }
 };
 
+// -----------------------------------------------------------------------------
 template <> struct Serializer<void> {
   using TStorage = void;
 
-  static auto deserialize(YAML::Node Node) {}
+  static auto deserialize(YAML::Node) {}
 
   static auto serialize() -> YAML::Node { return {}; }
 };
 
 namespace detail {
 
+// -----------------------------------------------------------------------------
 template <typename TArg1, typename... TArgs>
 auto unpackArg(YAML::iterator &YIt) {
   if constexpr (sizeof...(TArgs) > 0) {
@@ -62,12 +65,15 @@ auto unpackArg(YAML::iterator &YIt) {
   }
 }
 
-inline void packArg(YAML::Node &Node) {}
+// -----------------------------------------------------------------------------
+inline void packArg(YAML::Node &) {}
 
+// -----------------------------------------------------------------------------
 template <typename TArg> auto packArg(YAML::Node &Node, TArg LastArg) {
   Node.push_back(Serializer<TArg>::serialize(LastArg));
 }
 
+// -----------------------------------------------------------------------------
 template <typename TArg1, typename... TArgs>
 auto packArg(YAML::Node &Node, TArg1 Arg, TArgs... Args) {
   Node.push_back(Arg);
