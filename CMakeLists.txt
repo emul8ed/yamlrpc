@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.22)
 option(YAMLRPC_ENABLE_TESTING "Enable tests" ON)
 option(YAMLRPC_ENABLE_ZMQ_TESTS "Enable zeromq-based tests" ON)
 
-
 if (YAMLRPC_ENABLE_TESTING AND YAMLRPC_ENABLE_ZMQ_TESTS)
   set(YAMLRPC_VCPKG_JSON_CPPZMQ [["cppzmq",]])
 endif()
@@ -17,6 +16,8 @@ configure_file(vcpkg.json.in vcpkg.json @ONLY)
 set(VCPKG_MANIFEST_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# TODO: make this non-x64 only
+set(ENV{VCPKG_FORCE_SYSTEM_BINARIES} ON)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake CACHE STRING "")
 
 project(test-cpp)

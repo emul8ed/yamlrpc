@@ -2,6 +2,7 @@ enable_testing()
 
 add_executable(test-yamlrpc
   inproctests.cpp
+  inproctests-stub.cpp
 )
 
 find_package(GTest REQUIRED)
