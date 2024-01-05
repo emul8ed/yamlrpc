@@ -1,32 +1,31 @@
 #include "../yamlrpc.h"
+
 #include "inproctests.h"
 
 #include <gtest/gtest.h>
 
-#include <string>
+#include <functional>
+#include <memory>
+#include <utility>
 
 using namespace yamlrpc;
 
 class Inproc : public testing::Test {
 protected:
-  Inproc() : ServerObjects(makeServerObjects()) {
-  }
+  Inproc() : ServerObjects(makeServerObjects()) {}
 
-  void bindAll() {
-    ::bindAll(*ServerObjects);
-  }
+  void bindAll() { ::bindAll(*ServerObjects); }
 
   std::unique_ptr<ServerObjStorage> ServerObjects;
   InprocClient Client{ServerObjects->Server};
 
-  TestRpcObject ClientObj {Client};
+  TestRpcObject ClientObj{Client};
 };
 
-#define BIND_TARGET(Command, TargetFn) \
+#define BIND_TARGET(Command, TargetFn)                                         \
   ServerObjects->RpcObj.Command.bind(ServerObjects->Stub, &TestRpc::TargetFn)
 
-#define BIND(Command) \
-  BIND_TARGET(Command, Command)
+#define BIND(Command) BIND_TARGET(Command, Command)
 
 TEST_F(Inproc, Simple) {
   bindAll();
@@ -56,18 +55,18 @@ TEST_F(Inproc, Rebind) {
 TEST_F(Inproc, ScalarArg) {
   bindAll();
 
-  auto Result = ClientObj.scalarArgs(10u, 20u);
-  ASSERT_EQ(Result, 10u * 20u);
+  auto Result = ClientObj.scalarArgs(10U, 20U);
+  ASSERT_EQ(Result, 10U * 20U);
 }
 
 TEST_F(Inproc, ContainerArgs) {
-    // TODO
+  // TODO
 }
 
 TEST_F(Inproc, PairArgs) {
   bindAll();
-  
-  auto [Div, Rem] = ClientObj.pairArgs(std::make_pair(7u, 2u));
+
+  auto [Div, Rem] = ClientObj.pairArgs(std::make_pair(7U, 2U));
 
   ASSERT_EQ(Div, 3);
   ASSERT_EQ(Rem, 1);
@@ -99,7 +98,7 @@ TEST_F(Inproc, BindOnClientObject) {
       RpcError);
 }
 
-int main(int Argc, char **Argv) {
+auto main(int Argc, char **Argv) -> int {
   testing::InitGoogleTest(&Argc, Argv);
 
   return RUN_ALL_TESTS();

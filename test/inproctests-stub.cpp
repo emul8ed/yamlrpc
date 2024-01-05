@@ -1,20 +1,20 @@
 #include "inproctests.h"
+#include <cstdint>
+#include <memory>
+#include <utility>
 
-void TestRpc::simpleCall1() {
-  SimpleCall1 = true;
-}
+void TestRpc::simpleCall1() { SimpleCall1 = true; }
 
-void TestRpc::simpleCall2() {
-  SimpleCall2 = true;
-}
+void TestRpc::simpleCall2() { SimpleCall2 = true; }
 
 auto TestRpc::scalarArgs(uint32_t Arg1, uint32_t Arg2) -> uint32_t {
   return Arg1 * Arg2;
 }
 
-auto TestRpc::pairArgs(std::pair<uint32_t, uint32_t> Pair) -> std::pair<uint32_t, uint32_t> {
+auto TestRpc::pairArgs(std::pair<uint32_t, uint32_t> Pair)
+    -> std::pair<uint32_t, uint32_t> {
   auto [Num, Denom] = Pair;
-  
+
   return std::make_pair(Num / Denom, Num % Denom);
 }
 
