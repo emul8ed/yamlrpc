@@ -1,0 +1,7 @@
+{
+    "dependencies": [
+        @YAMLRPC_VCPKG_JSON_CPPZMQ@
+        @YAMLRPC_VCPKG_JSON_GTEST@
+        "yaml-cpp"
+    ]
+}
