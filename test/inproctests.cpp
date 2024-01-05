@@ -54,14 +54,13 @@ TEST_F(Inproc, Rebind) {
 }
 
 TEST_F(Inproc, ScalarArg) {
-    // TODO
+  bindAll();
+
+  auto Result = ClientObj.scalarArgs(10u, 20u);
+  ASSERT_EQ(Result, 10u * 20u);
 }
 
 TEST_F(Inproc, VectorArg) {
-    // TODO
-}
-
-TEST_F(Inproc, MultipleArgs) {
     // TODO
 }
 
