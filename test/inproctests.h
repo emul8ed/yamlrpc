@@ -33,12 +33,18 @@ template <> struct Serializer<Custom> {
 
 } // namespace yamlrpc
 
-struct TestRpcObject : public yamlrpc::RpcObject {
-  TestRpcObject(yamlrpc::RpcTransport &Transport) : yamlrpc::RpcObject(Transport) {}
+namespace yr = yamlrpc;
 
-  yamlrpc::Command<void> simpleCall{this};
-  yamlrpc::Command<uint32_t, uint32_t, uint32_t> scalarArgs{this};
-  yamlrpc::Command<Custom, Custom> customType{this};
+struct TestRpcObject : public yr::RpcObject {
+  TestRpcObject(yr::RpcTransport &Transport) : yr::RpcObject(Transport) {}
+
+  yr::Command<void> simpleCall{this};
+
+  yr::Command<uint32_t, uint32_t, uint32_t> scalarArgs{this};
+
+  yr::Command<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>> pairArgs{this};
+
+  yr::Command<Custom, Custom> customType{this};
 };
 
 struct TestRpc {
@@ -46,16 +52,18 @@ struct TestRpc {
 
   void simpleCall2();
 
-  auto customType(Custom Arg) -> Custom;
-  
   auto scalarArgs(uint32_t Arg1, uint32_t Arg2) -> uint32_t;
 
+  auto pairArgs(std::pair<uint32_t, uint32_t>) -> std::pair<uint32_t, uint32_t>;
+
+  auto customType(Custom Arg) -> Custom;
+  
   bool SimpleCall1 = false;
   bool SimpleCall2 = false;
 };
 
 struct ServerObjStorage {
-  yamlrpc::InprocServer Server;
+  yr::InprocServer Server;
   TestRpcObject RpcObj {Server};
   TestRpc Stub;
 };

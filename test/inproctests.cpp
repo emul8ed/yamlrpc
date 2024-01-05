@@ -60,8 +60,17 @@ TEST_F(Inproc, ScalarArg) {
   ASSERT_EQ(Result, 10u * 20u);
 }
 
-TEST_F(Inproc, VectorArg) {
+TEST_F(Inproc, ContainerArgs) {
     // TODO
+}
+
+TEST_F(Inproc, PairArgs) {
+  bindAll();
+  
+  auto [Div, Rem] = ClientObj.pairArgs(std::make_pair(7u, 2u));
+
+  ASSERT_EQ(Div, 3);
+  ASSERT_EQ(Rem, 1);
 }
 
 TEST_F(Inproc, CustomArg) {
