@@ -26,7 +26,6 @@ SOFTWARE.
 
 #include <cstdint>
 #include <functional>
-#include <string>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -77,18 +76,10 @@ auto packArg(YAML::Node &Node, TArg1 Arg, TArgs... Args) {
 
 } // namespace detail
 
-class Skel {
-public:
-  void theMethod(std::vector<std::string> const &Vec);
-  auto returningMethod(std::vector<std::string> const &Vec) -> std::string;
-  auto sortVector(std::vector<std::string> const &Vec)
-      -> std::vector<std::string>;
-};
-
 // -----------------------------------------------------------------------------
 class CommandBase {
 public:
-  auto getCommandId() const -> uint32_t { return CommandId; }
+  [[nodiscard]] auto getCommandId() const -> uint32_t { return CommandId; }
 
 private:
   friend class RpcTransport;
@@ -120,14 +111,14 @@ public:
   }
 
 public:
-  virtual auto isClient() const -> bool { return false; };
-  virtual auto isServer() const -> bool { return false; };
+  [[nodiscard]] virtual auto isClient() const -> bool { return false; };
+  [[nodiscard]] virtual auto isServer() const -> bool { return false; };
   virtual auto invokeEndpoint(YAML::Node &InputNode) -> YAML::Node = 0;
 
 protected:
   auto invokeCommand(YAML::Node InputNode) {
     // TODO: error handling
-    uint32_t CmdIdx = InputNode[0].as<uint32_t>();
+    auto CmdIdx = InputNode[0].as<uint32_t>();
     auto *Command = Commands[CmdIdx];
     YAML::Node ArgsNode = InputNode[1];
     return Command->invoke(ArgsNode);
@@ -149,10 +140,10 @@ public:
   auto operator=(RpcObject &&) = delete;
   
 public:
-  auto getTransport() const -> RpcTransport const & {
+  [[nodiscard]] auto getTransport() const -> RpcTransport const & {
     return Transport;
   }
-  auto getTransport() -> RpcTransport & {
+  [[nodiscard]] auto getTransport() -> RpcTransport & {
     return Transport;
   }
 
@@ -171,7 +162,7 @@ class InprocServer;
 // -----------------------------------------------------------------------------
 class InprocServer : public RpcTransport {
 public:
-  auto isServer() const -> bool override {
+  [[nodiscard]] auto isServer() const -> bool override {
     return true;
   }
 
@@ -185,7 +176,7 @@ class InprocClient : public RpcTransport {
 public:
   InprocClient(InprocServer &Server) : Server(Server) {}
 
-  auto isClient() const -> bool override {
+  [[nodiscard]] auto isClient() const -> bool override {
     return true;
   }
 

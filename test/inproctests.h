@@ -7,8 +7,8 @@
 #include <string>
 
 struct Custom {
-    uint32_t Field1;
-    std::string Field2;
+  uint32_t Field1;
+  std::string Field2;
 };
 
 namespace yamlrpc {
@@ -42,7 +42,8 @@ struct TestRpcObject : public yr::RpcObject {
 
   yr::Command<uint32_t, uint32_t, uint32_t> scalarArgs{this};
 
-  yr::Command<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>> pairArgs{this};
+  yr::Command<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>
+      pairArgs{this};
 
   yr::Command<Custom, Custom> customType{this};
 };
@@ -57,14 +58,14 @@ struct TestRpc {
   auto pairArgs(std::pair<uint32_t, uint32_t>) -> std::pair<uint32_t, uint32_t>;
 
   auto customType(Custom Arg) -> Custom;
-  
+
   bool SimpleCall1 = false;
   bool SimpleCall2 = false;
 };
 
 struct ServerObjStorage {
   yr::InprocServer Server;
-  TestRpcObject RpcObj {Server};
+  TestRpcObject RpcObj{Server};
   TestRpc Stub;
 };
 
