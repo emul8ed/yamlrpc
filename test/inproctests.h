@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <tuple>
 
 struct Custom {
   uint32_t Field1;
@@ -44,6 +45,9 @@ struct TestRpcObject : public yr::RpcObject {
 
   yr::Command<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>
       pairArgs{this};
+  
+  // TODO: support reference to tuple
+  yr::Command<std::tuple<uint32_t, std::string>, std::tuple<uint32_t, uint32_t, uint32_t>> tupleArgs{this};
 
   yr::Command<Custom, Custom> customType{this};
 };
@@ -56,6 +60,8 @@ struct TestRpc {
   auto scalarArgs(uint32_t Arg1, uint32_t Arg2) -> uint32_t;
 
   auto pairArgs(std::pair<uint32_t, uint32_t>) -> std::pair<uint32_t, uint32_t>;
+
+  auto tupleArgs(std::tuple<uint32_t, uint32_t, uint32_t>) -> std::tuple<uint32_t, std::string>;
 
   auto customType(Custom Arg) -> Custom;
 

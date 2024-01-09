@@ -3,19 +3,41 @@ enable_testing()
 find_package(GTest REQUIRED)
 find_package(cppzmq REQUIRED)
 
-add_executable(test-yamlrpc
-  inproctests.cpp
-  inproctests-stub.cpp
-)
+add_library(test-yamlrpc INTERFACE)
 
-set_target_properties(test-yamlrpc PROPERTIES CXX_STANDARD 17)
-
-target_link_libraries(test-yamlrpc PRIVATE
-  cppzmq-static
+target_link_libraries(test-yamlrpc INTERFACE
   GTest::gtest
   yamlrpc
 )
 
-add_test(NAME test-yamlrpc
-  COMMAND $<TARGET_FILE:test-yamlrpc>
+add_executable(test-yamlrpc-inproc
+  inproctests.cpp
+  inproctests-stub.cpp
+)
+
+set_target_properties(test-yamlrpc-inproc PROPERTIES CXX_STANDARD 17)
+
+target_link_libraries(test-yamlrpc-inproc PRIVATE
+  cppzmq-static
+  test-yamlrpc
+)
+
+add_test(NAME test-yamlrpc-inproc
+  COMMAND $<TARGET_FILE:test-yamlrpc-inproc>
+)
+
+add_executable(test-yamlrpc-zmq
+  zmqclient.cpp
+  zmqserver.cpp
+)
+
+set_target_properties(test-yamlrpc-zmq PROPERTIES CXX_STANDARD 17)
+
+target_link_libraries(test-yamlrpc-zmq PRIVATE
+  test-yamlrpc
+  cppzmq-static
+)
+
+add_test(NAME test-yamlrpc-zmq
+  COMMAND $<TARGET_FILE:test-yamlrpc-zmq>
   )

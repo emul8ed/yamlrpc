@@ -1,6 +1,7 @@
 #include "inproctests.h"
 #include <cstdint>
 #include <memory>
+#include <string>
 #include <utility>
 
 void TestRpc::simpleCall1() { SimpleCall1 = true; }
@@ -18,6 +19,14 @@ auto TestRpc::pairArgs(std::pair<uint32_t, uint32_t> Pair)
   return std::make_pair(Num / Denom, Num % Denom);
 }
 
+auto TestRpc::tupleArgs(std::tuple<uint32_t, uint32_t, uint32_t> Value)
+    -> std::tuple<uint32_t, std::string> {
+  auto [a, b, c] = Value;
+  uint32_t Result = (a * b) + c;
+  std::string Str = std::string("Result: ") + std::to_string(Result);
+  return std::make_tuple(Result, Str);
+}
+
 auto TestRpc::customType(Custom Arg) -> Custom {
   return {Arg.Field1 + 111, Arg.Field2 + "->out"};
 }
@@ -30,5 +39,6 @@ void bindAll(ServerObjStorage &Storage) {
   Storage.RpcObj.simpleCall.bind(Storage.Stub, &TestRpc::simpleCall1);
   Storage.RpcObj.scalarArgs.bind(Storage.Stub, &TestRpc::scalarArgs);
   Storage.RpcObj.pairArgs.bind(Storage.Stub, &TestRpc::pairArgs);
+  Storage.RpcObj.tupleArgs.bind(Storage.Stub, &TestRpc::tupleArgs);
   Storage.RpcObj.customType.bind(Storage.Stub, &TestRpc::customType);
 }

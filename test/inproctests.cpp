@@ -63,6 +63,7 @@ TEST_F(Inproc, ContainerArgs) {
   // TODO
 }
 
+/// @test Verify serialize/deserialize of std::pair arg/return
 TEST_F(Inproc, PairArgs) {
   bindAll();
 
@@ -71,6 +72,19 @@ TEST_F(Inproc, PairArgs) {
   ASSERT_EQ(Div, 3);
   ASSERT_EQ(Rem, 1);
 }
+
+TEST_F(Inproc, TupleArgs) {
+  bindAll();
+
+  auto [ResultInt, ResultStr] = ClientObj.tupleArgs(std::make_tuple(4U, 5U, 6U));
+
+  ASSERT_EQ(ResultInt, (4U * 5U) + 6U);
+  ASSERT_EQ(ResultStr, "Result: 26");
+}
+
+// TODO: nested tuple
+// TODO: custom type with/without copy/move
+// TODO: verify mismatched types in arg pair/tuple
 
 TEST_F(Inproc, CustomArg) {
   bindAll();
