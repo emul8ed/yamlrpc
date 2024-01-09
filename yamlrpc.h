@@ -24,6 +24,7 @@ SOFTWARE.
 
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <functional>
 #include <tuple>
@@ -40,7 +41,7 @@ template <typename T> struct Serializer {
 
   static auto deserialize(YAML::Node Node) { return Node.as<TStorage>(); }
 
-  static auto serialize(T const &Value) { return YAML::Node{Value}; }
+  static auto serialize(T const &Value) -> YAML::Node { return YAML::Node{Value}; }
 };
 
 // -----------------------------------------------------------------------------
@@ -50,6 +51,43 @@ template <> struct Serializer<void> {
   static auto deserialize(YAML::Node) {}
 
   static auto serialize() -> YAML::Node { return {}; }
+};
+
+// -----------------------------------------------------------------------------
+template <typename... TArgs> struct Serializer<std::tuple<TArgs...>> {
+  using TStorage = std::tuple<TArgs...>;
+
+  template <typename TFirst, typename... TRemain>
+  static auto deserializeTuple(YAML::iterator YIt) -> std::tuple<TFirst, TRemain...> {
+    if constexpr (sizeof...(TRemain) > 0) {
+      return std::tuple_cat(
+          std::make_tuple(Serializer<TFirst>::deserialize(*YIt)), deserializeTuple<TRemain...>(++YIt));
+    } else {
+      return std::make_tuple(Serializer<TFirst>::deserialize(*YIt));
+    }
+  }
+
+  // TODO: handle yaml exceptions and convert?
+  static auto deserialize(YAML::Node Node) {
+    assert(Node.IsSequence());
+    assert(Node.size() == sizeof...(TArgs));
+    return deserializeTuple<TArgs...>(Node.begin());
+  }
+
+  template <size_t N>
+  static void serializeTuple(YAML::Node &Node, std::tuple<TArgs...> const &Tuple) {
+    if constexpr (N < sizeof...(TArgs)) {
+      Node.push_back(Serializer<decltype(std::get<N>(Tuple))>::serialize(
+          std::get<N>(Tuple)));
+      serializeTuple<N + 1>(Node, Tuple);
+    }
+  }
+
+  static auto serialize(std::tuple<TArgs...> const &Value) -> YAML::Node {
+    YAML::Node SeqNode {YAML::NodeType::Sequence};
+    serializeTuple<0>(SeqNode, Value);
+    return SeqNode;
+  }
 };
 
 namespace detail {
@@ -89,6 +127,8 @@ public:
 
 private:
   friend class RpcTransport;
+  friend class RpcServer;
+  friend class RpcClient;
 
   void setCommandId(uint32_t CmdId) { CommandId = CmdId; }
 
@@ -122,6 +162,25 @@ public:
   virtual auto invokeEndpoint(YAML::Node &InputNode) -> YAML::Node = 0;
 
 protected:
+  std::vector<CommandBase *> Commands;
+};
+
+// -----------------------------------------------------------------------------
+class RpcClient : public RpcTransport {
+public:
+  [[nodiscard]] auto isClient() const -> bool override {
+    return true;
+  }
+};
+
+// -----------------------------------------------------------------------------
+class RpcServer : public RpcTransport {
+public:
+  [[nodiscard]] auto isServer() const -> bool override {
+    return true;
+  }
+
+protected:
   auto invokeCommand(YAML::Node InputNode) {
     // TODO: error handling
     auto CmdIdx = InputNode[0].as<uint32_t>();
@@ -129,9 +188,6 @@ protected:
     YAML::Node ArgsNode = InputNode[1];
     return Command->invoke(ArgsNode);
   }
-
-protected:
-  std::vector<CommandBase *> Commands;
 };
 
 // -----------------------------------------------------------------------------
@@ -166,25 +222,17 @@ public:
 class InprocServer;
 
 // -----------------------------------------------------------------------------
-class InprocServer : public RpcTransport {
+class InprocServer : public RpcServer {
 public:
-  [[nodiscard]] auto isServer() const -> bool override {
-    return true;
-  }
-
   auto invokeEndpoint(YAML::Node &InputNode) -> YAML::Node override {
     return invokeCommand(InputNode);
   }
 };
 
 // -----------------------------------------------------------------------------
-class InprocClient : public RpcTransport {
+class InprocClient : public RpcClient {
 public:
   InprocClient(InprocServer &Server) : Server(Server) {}
-
-  [[nodiscard]] auto isClient() const -> bool override {
-    return true;
-  }
 
   auto invokeEndpoint(YAML::Node &InputNode) -> YAML::Node override {
     return Server.invokeEndpoint(InputNode);
