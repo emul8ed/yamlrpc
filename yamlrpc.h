@@ -77,8 +77,9 @@ template <typename... TArgs> struct Serializer<std::tuple<TArgs...>> {
   template <size_t N>
   static void serializeTuple(YAML::Node &Node, std::tuple<TArgs...> const &Tuple) {
     if constexpr (N < sizeof...(TArgs)) {
-      Node.push_back(Serializer<decltype(std::get<N>(Tuple))>::serialize(
-          std::get<N>(Tuple)));
+      using TTuple = std::decay_t<decltype(Tuple)>;
+      using TElem = std::tuple_element_t<N, TTuple>;
+      Node.push_back(Serializer<TElem>::serialize(std::get<N>(Tuple)));
       serializeTuple<N + 1>(Node, Tuple);
     }
   }

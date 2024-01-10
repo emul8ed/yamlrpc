@@ -7,6 +7,15 @@
 #include <string>
 #include <tuple>
 
+namespace yr = yamlrpc;
+
+#if defined(ZMQ_TRANSPORT)
+# include "zmqtransport.h"
+using TServerTransport = ZmqServer;
+#else
+using TServerTransport = yr::InprocServer;
+#endif // defined(ZMQ_TRANSPORT)
+ 
 struct Custom {
   uint32_t Field1;
   std::string Field2;
@@ -19,8 +28,8 @@ template <> struct Serializer<Custom> {
 
   static auto deserialize(YAML::Node Node) {
     Custom Result;
-    Result.Field1 = Node["Field1"].as<typeof(Result.Field1)>();
-    Result.Field2 = Node["Field2"].as<typeof(Result.Field2)>();
+    Result.Field1 = Node["Field1"].as<decltype(Result.Field1)>();
+    Result.Field2 = Node["Field2"].as<decltype(Result.Field2)>();
     return Result;
   }
 
@@ -34,8 +43,6 @@ template <> struct Serializer<Custom> {
 
 } // namespace yamlrpc
 
-namespace yr = yamlrpc;
-
 struct TestRpcObject : public yr::RpcObject {
   TestRpcObject(yr::RpcTransport &Transport) : yr::RpcObject(Transport) {}
 
@@ -48,6 +55,8 @@ struct TestRpcObject : public yr::RpcObject {
   
   // TODO: support reference to tuple
   yr::Command<std::tuple<uint32_t, std::string>, std::tuple<uint32_t, uint32_t, uint32_t>> tupleArgs{this};
+
+  yr::Command<std::tuple<std::string, std::tuple<uint64_t, float>>, std::tuple<std::tuple<uint32_t, uint32_t>, std::tuple<float, double>>> nestedTupleArgs{this};
 
   yr::Command<Custom, Custom> customType{this};
 };
@@ -63,6 +72,8 @@ struct TestRpc {
 
   auto tupleArgs(std::tuple<uint32_t, uint32_t, uint32_t>) -> std::tuple<uint32_t, std::string>;
 
+  auto nestedTupleArgs(std::tuple<std::tuple<uint32_t, uint32_t>, std::tuple<float, double>>) -> std::tuple<std::string, std::tuple<uint64_t, float>>;
+
   auto customType(Custom Arg) -> Custom;
 
   bool SimpleCall1 = false;
@@ -70,7 +81,7 @@ struct TestRpc {
 };
 
 struct ServerObjStorage {
-  yr::InprocServer Server;
+  TServerTransport Server;
   TestRpcObject RpcObj{Server};
   TestRpc Stub;
 };

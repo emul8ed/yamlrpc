@@ -17,7 +17,11 @@ protected:
   void bindAll() { ::bindAll(*ServerObjects); }
 
   std::unique_ptr<ServerObjStorage> ServerObjects;
+#if defined(ZMQ_TRANSPORT)
+  ZmqClient Client;
+#else // defined(ZMQ_TRANSPORT)
   InprocClient Client{ServerObjects->Server};
+#endif // defined(ZMQ_TRANSPORT)
 
   TestRpcObject ClientObj{Client};
 };
@@ -80,6 +84,24 @@ TEST_F(Inproc, TupleArgs) {
 
   ASSERT_EQ(ResultInt, (4U * 5U) + 6U);
   ASSERT_EQ(ResultStr, "Result: 26");
+}
+
+TEST_F(Inproc, NestedTupleArgs) {
+  bindAll();
+
+  auto [ResultStr, ResultTuple] = ClientObj.nestedTupleArgs(std::make_tuple(
+      std::make_tuple(11U, 34U),
+      std::make_tuple(
+          1.11f,
+          2.34))); // yr::Command<std::tuple<std::string, std::tuple<uint64_t,
+                   // float>>, std::tuple<std::tuple<uint32_t, uint32_t>,
+                   // std::tuple<float, double>>>
+
+  ASSERT_EQ(ResultStr, "A string");
+  
+  auto [ResultInt, ResultFloat] = ResultTuple;
+  ASSERT_EQ(ResultInt, 11U * 34U);
+  ASSERT_EQ(ResultFloat, static_cast<float>(2.34 / 1.11f));
 }
 
 // TODO: nested tuple
