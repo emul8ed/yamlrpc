@@ -8,6 +8,8 @@
 #include <memory>
 #include <utility>
 
+#include <unistd.h>
+
 using namespace yamlrpc;
 
 class Inproc : public testing::Test {
@@ -31,8 +33,10 @@ protected:
 
 void Inproc::SetUp() {
 #if defined(ZMQ_TRANSPORT)
-  ServerObjects->Server.start("ipc:///tmp/test-yamlrpc-zmq.tmp");
-  Client.connect("ipc:///tmp/test-yamlrpc-zmq.tmp");
+  char Path[1024];
+  sprintf(Path, "ipc:///tmp/test-yamlrpc-zmq-%u.sock", getpid());
+  ServerObjects->Server.start(Path);
+  Client.connect(Path);
 #endif // defined(ZMQ_TRANSPORT)
 }
 
