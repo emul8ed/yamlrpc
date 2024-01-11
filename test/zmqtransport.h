@@ -26,11 +26,9 @@ private:
 // -----------------------------------------------------------------------------
 class ZmqClient : public yr::RpcClient {
 public:
-  auto connect(char const *Addr) { Socket.connect(Addr); }
+  void connect(char const *Addr) { Socket.connect(Addr); }
 
-  auto invokeEndpoint(YAML::Node &InputNode) -> YAML::Node override {
-    return {}; // TODO 
-  }
+  auto invokeEndpoint(YAML::Node &InputNode) -> YAML::Node override;
 
 private:
   zmq::context_t Context{1};

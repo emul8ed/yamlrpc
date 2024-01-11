@@ -2,6 +2,7 @@
 #include "../yamlrpc.h"
 
 #include <iostream>
+#include <zmq.hpp>
 
 using namespace yamlrpc;
 
@@ -34,7 +35,9 @@ void ZmqServer::start(char const *Addr) {
                     zmq::send_flags::none);
       }
     } catch (zmq::error_t &Err) {
-      std::cerr << "Caught zmq::error_t: " << Err.what() << "\n";
+      if (Err.num() != ETERM) {
+        std::cerr << "Caught zmq::error_t: " << Err.what() << "\n";
+      }
     }
   }};
 }
