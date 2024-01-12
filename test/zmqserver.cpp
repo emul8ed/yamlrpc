@@ -17,7 +17,7 @@ void ZmqServer::start(char const *Addr) {
 
         auto Result = Socket.recv(Request, zmq::recv_flags::none);
         if (!Result) {
-          // @@@@ Handle this properly
+          // TODO: Handle this properly
           std::cerr << "Socket.recv returned error: " << Result.value() << "\n";
         }
 

@@ -12,6 +12,10 @@ auto TestRpc::scalarArgs(uint32_t Arg1, uint32_t Arg2) -> uint32_t {
   return Arg1 * Arg2;
 }
 
+auto TestRpc::simpleConstCall() const -> uint32_t {
+  return 123456U;
+}
+
 auto TestRpc::pairArgs(std::pair<uint32_t, uint32_t> Pair)
     -> std::pair<uint32_t, uint32_t> {
   auto [Num, Denom] = Pair;
@@ -52,6 +56,7 @@ auto makeServerObjects() -> std::unique_ptr<ServerObjStorage> {
 
 void bindAll(ServerObjStorage &Storage) {
   Storage.RpcObj.simpleCall.bind(Storage.Stub, &TestRpc::simpleCall1);
+  Storage.RpcObj.simpleConstCall.bind(Storage.Stub, &TestRpc::simpleConstCall);
   Storage.RpcObj.scalarArgs.bind(Storage.Stub, &TestRpc::scalarArgs);
   Storage.RpcObj.pairArgs.bind(Storage.Stub, &TestRpc::pairArgs);
   Storage.RpcObj.tupleArgs.bind(Storage.Stub, &TestRpc::tupleArgs);

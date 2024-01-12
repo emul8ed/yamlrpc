@@ -59,6 +59,13 @@ TEST_F(Inproc, Simple) {
   ASSERT_TRUE(ServerObjects->Stub.SimpleCall1);
 }
 
+TEST_F(Inproc, SimpleConst) {
+  bindAll();
+
+  uint32_t Value = ClientObj.simpleConstCall();
+  ASSERT_EQ(Value, 123456);
+}
+
 TEST_F(Inproc, Rebind) {
   ASSERT_FALSE(ServerObjects->Stub.SimpleCall1);
   ASSERT_FALSE(ServerObjects->Stub.SimpleCall2);

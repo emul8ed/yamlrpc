@@ -48,6 +48,8 @@ struct TestRpcObject : public yr::RpcObject {
 
   yr::Command<void> simpleCall{this};
 
+  yr::Command<uint32_t> simpleConstCall{this};
+
   yr::Command<uint32_t, uint32_t, uint32_t> scalarArgs{this};
 
   yr::Command<std::pair<uint32_t, uint32_t>, std::pair<uint32_t, uint32_t>>
@@ -65,6 +67,8 @@ struct TestRpc {
   void simpleCall1();
 
   void simpleCall2();
+  
+  [[nodiscard]] auto simpleConstCall() const -> uint32_t;
 
   auto scalarArgs(uint32_t Arg1, uint32_t Arg2) -> uint32_t;
 

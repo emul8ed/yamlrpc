@@ -274,16 +274,30 @@ public:
     return Serializer<TReturn>::deserialize(RetNode);
   }
 
-  template <typename TThis>
-  void bind(TThis &This, auto (TThis::*Function)(TArgs...)->TReturn) {
+  void bind(TCallback Function) {
     if (!RpcIf.isServer()) {
       throw RpcError {"Not a server object"};
     }
-    
+
+    Callback = std::move(Function);
+  }
+
+  template <typename TThis>
+  void bind(TThis &This, auto (TThis::*Function)(TArgs...)->TReturn) {
     auto LambdaWrapper = [&This, Function](TArgs... Args) {
       return (This.*Function)(Args...);
     };
-    Callback = LambdaWrapper;
+
+    bind(std::move(LambdaWrapper));
+  }
+
+  template <typename TThis>
+  void bind(TThis const &This, auto (TThis::*Function)(TArgs...) const->TReturn) {
+    auto LambdaWrapper = [&This, Function](TArgs... Args) {
+      return (This.*Function)(Args...);
+    };
+
+    bind(std::move(LambdaWrapper));
   }
 
 private:
