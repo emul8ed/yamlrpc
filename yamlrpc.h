@@ -257,7 +257,7 @@ public:
     RpcIf.addCommand(*this);
   }
 
-  auto operator()(TArgs... Args) -> TReturn {
+  auto operator()(TArgs... Args) const -> TReturn {
     if (!RpcIf.isClient()) {
       throw RpcError {"Not a client object"};
     }
