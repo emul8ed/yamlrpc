@@ -250,7 +250,7 @@ public:
   using TCallback = std::function<auto(TArgs...)->TReturn>;
 
   // TODO: handle containers of string views?
-  static_assert(!std::is_same_v<TReturn, std::string_view>,
+  static_assert(!std::is_same<TReturn, std::string_view>::value,
                 "string_view is not a valid return type (no storage)");
 
   Command(RpcObject *RpcInterface) : RpcIf(RpcInterface->getTransport()) {
@@ -307,7 +307,7 @@ private:
     auto YIt = InputNode.begin();
 
     if constexpr (sizeof...(TArgs) == 0) {
-      if constexpr (std::is_void_v<TReturn>) {
+      if constexpr (std::is_void<TReturn>::value) {
         Callback();
         return {};
       } else {
@@ -316,7 +316,7 @@ private:
     } else {
       auto Tuple = detail::unpackArg<TArgs...>(YIt);
 
-      if constexpr (std::is_void_v<TReturn>) {
+      if constexpr (std::is_void<TReturn>::value) {
         std::apply(Callback, std::move(Tuple));
         return {};
       } else {
