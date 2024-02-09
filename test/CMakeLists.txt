@@ -9,6 +9,12 @@ target_sources(test-yamlrpc INTERFACE
   inproctests-stub.cpp
 )
 
+target_compile_options(test-yamlrpc INTERFACE
+  -Wall
+  -Wextra
+  -Werror
+)
+
 target_link_libraries(test-yamlrpc INTERFACE
   GTest::gtest
   yamlrpc

@@ -143,7 +143,7 @@ private:
 class RpcTransport {
 public:
   RpcTransport() = default;
-  ~RpcTransport() = default;
+  virtual ~RpcTransport() = default;
   
   RpcTransport(RpcTransport &&) = delete;
   auto operator=(RpcTransport &&) = delete;
